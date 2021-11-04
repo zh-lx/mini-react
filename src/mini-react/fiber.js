@@ -63,6 +63,28 @@ function performUnitOfWork(workInProgress) {
       index++;
     }
   }
+
+  // 设置下一个工作单元
+  if (workInProgress.child) {
+    // 如果有子 fiber，则下一个工作单元是子 fiber
+    nextUnitOfWork = workInProgress.child;
+  } else {
+    let nextFiber = workInProgress;
+    while (nextFiber) {
+      if (nextFiber.sibling) {
+        // 没有子 fiber 有兄弟 fiber，则下一个工作单元是兄弟 fiber
+        nextUnitOfWork = nextFiber.sibling;
+        return;
+      } else {
+        // 子 fiber 和兄弟 fiber 都没有，深度优先遍历返回上一层
+        nextFiber = nextFiber.return;
+      }
+    }
+    if (!nextFiber) {
+      // 若返回最顶层，表示迭代结束，将 nextUnitOfWork 置空
+      nextUnitOfWork = null;
+    }
+  }
 }
 
 // 列表渲染、条件渲染、React 组件等情况进行处理
