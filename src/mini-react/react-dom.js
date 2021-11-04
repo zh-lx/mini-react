@@ -69,7 +69,19 @@ function renderDom(element) {
 
 // 更新 dom 属性
 function updateAttributes(dom, attributes) {
-  Object.keys(attributes).forEach((key) => {
+  const events = Object.keys(attributes).filter((attribute) =>
+    attribute.startsWith('on')
+  );
+  const attrs = Object.keys(attributes).filter(
+    (attribute) => !attribute.startsWith('on')
+  );
+  // 绑定事件
+  events.forEach((event) => {
+    const eventName = event.slice(2).toLowerCase();
+    dom.addEventListener(eventName, attributes[event]);
+  });
+  // 添加属性
+  attrs.forEach((key) => {
     if (key === 'className') {
       // className 的处理
       const classes = attributes[key].split(' ');
