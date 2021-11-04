@@ -2,18 +2,20 @@ import { renderDom } from './react-dom';
 import { commitRoot } from './commit';
 
 let nextUnitOfWork = null;
-let rootFiber = null;
+let workInProgressRoot = null; // 当前工作的 fiber 树
+let currentRoot = null; // 上一次渲染的 fiber 树
 
 // 创建 rootFiber 作为首个 nextUnitOfWork
 export function createRoot(element, container) {
-  rootFiber = {
+  workInProgressRoot = {
     stateNode: container, // 记录对应的真实 dom 节点
     element: {
       // 挂载 element
       props: { children: [element] },
     },
+    alternate: currentRoot,
   };
-  nextUnitOfWork = rootFiber;
+  nextUnitOfWork = workInProgressRoot;
 }
 
 // 执行当前工作单元任务并设置下一个要执行的工作单元
@@ -129,10 +131,11 @@ function workLoop(deadline) {
     performUnitOfWork(nextUnitOfWork);
     shouldYield = deadline.timeRemaining() < 1;
   }
-  if (!nextUnitOfWork && rootFiber) {
+  if (!nextUnitOfWork && workInProgressRoot) {
     // 表示进入 commit 阶段
-    commitRoot(rootFiber);
-    rootFiber = null;
+    commitRoot(workInProgressRoot);
+    currentRoot = workInProgressRoot;
+    workInProgressRoot = null;
   }
   requestIdleCallback(workLoop);
 }
