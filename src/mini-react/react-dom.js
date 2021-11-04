@@ -8,23 +8,9 @@ function render(element, container) {
 export function renderDom(element) {
   let dom = null; // 要返回的 dom
 
-  if (!element) {
-    return document.createDocumentFragment();
-  }
-
   if (typeof element === 'string') {
     // 如果 element 本身为 string，表示文本节点，不需要考虑其 props 直接返回
     dom = document.createTextNode(element);
-    return dom;
-  }
-
-  if (Array.isArray(element)) {
-    // 数组类型的渲染
-    dom = document.createDocumentFragment();
-    for (let item of element) {
-      const child = renderDom(item);
-      dom.appendChild(child);
-    }
     return dom;
   }
 
@@ -36,31 +22,8 @@ export function renderDom(element) {
   if (typeof type === 'string') {
     // 常规 dom 节点的渲染
     dom = document.createElement(type);
-  } else if (typeof type === 'function') {
-    // React组件的渲染
-    if (type.prototype.isReactComponent) {
-      // 类组件
-      const { props, type: Comp } = element;
-      const component = new Comp(props);
-      const jsx = component.render();
-      dom = renderDom(jsx);
-    } else {
-      // 函数组件
-      const { props, type: Fn } = element;
-      const jsx = Fn(props);
-      dom = renderDom(jsx);
-    }
-  } else if (type.toString() === 'Symbol(react.fragment)') {
-    // React.Fragment 的渲染
-    dom = document.createDocumentFragment();
   } else {
     // 其他情况暂不考虑
-  }
-
-  if (children) {
-    // children 存在，对子节点递归渲染
-    const childrenDom = renderDom(children);
-    dom.appendChild(childrenDom);
   }
 
   updateAttributes(dom, attributes);
