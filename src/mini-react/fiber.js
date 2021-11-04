@@ -1,5 +1,6 @@
 import { renderDom } from './react-dom';
 import { commitRoot } from './commit';
+import { reconcileChildren } from './reconciler';
 
 let nextUnitOfWork = null;
 let workInProgressRoot = null; // 当前工作的 fiber 树
@@ -31,36 +32,7 @@ function performUnitOfWork(workInProgress) {
   if (children) {
     let elements = Array.isArray(children) ? children : [children];
     elements = handleElements(elements);
-    // element 存在，则遍历其挂载到 fiber 树上
-    let index = 0; // 当前遍历的子元素在父节点下的下标
-    let prevSibling = null; // 记录上一个兄弟节点
-
-    while (index < elements.length) {
-      // 遍历子元素
-      const element = elements[index];
-      // 创建新的 fiber
-      const newFiber = {
-        element: Array.isArray(element) // 针对嵌套数组处理
-          ? {
-              type: Symbol('react.fragment'),
-              props: {
-                children: element,
-              },
-            }
-          : element,
-        return: workInProgress,
-        stateNode: null,
-      };
-      if (index === 0) {
-        // 如果下标为 0，则将当前fiber设置为父 fiber 的 child
-        workInProgress.child = newFiber;
-      } else {
-        // 否则通过 sibling 作为兄弟 fiber 连接
-        prevSibling.sibling = newFiber;
-      }
-      prevSibling = newFiber;
-      index++;
-    }
+    reconcileChildren(workInProgress, elements);
   }
 
   // 设置下一个工作单元
