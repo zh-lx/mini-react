@@ -29,7 +29,7 @@ function renderDom(element) {
 
   const {
     type,
-    props: { children },
+    props: { children, ...attributes },
   } = element;
 
   if (typeof type === 'string') {
@@ -62,7 +62,31 @@ function renderDom(element) {
     dom.appendChild(childrenDom);
   }
 
+  updateAttributes(dom, attributes);
+
   return dom;
+}
+
+// 更新 dom 属性
+function updateAttributes(dom, attributes) {
+  Object.keys(attributes).forEach((key) => {
+    if (key === 'className') {
+      // className 的处理
+      const classes = attributes[key].split(' ');
+      classes.forEach((classKey) => {
+        dom.classList.add(classKey);
+      });
+    } else if (key === 'style') {
+      // style处理
+      const style = attributes[key];
+      Object.keys(style).forEach((styleKey) => {
+        dom.style[styleKey] = style[styleKey];
+      });
+    } else {
+      // 其他属性的处理
+      dom[key] = attributes[key];
+    }
+  });
 }
 
 const ReactDOM = {
