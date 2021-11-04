@@ -5,7 +5,7 @@ function render(element, container) {
 }
 
 // 将 React.Element 渲染为真实 dom
-function renderDom(element) {
+export function renderDom(element) {
   let dom = null; // 要返回的 dom
 
   if (!element) {
