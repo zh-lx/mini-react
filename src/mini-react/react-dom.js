@@ -32,7 +32,42 @@ export function renderDom(element) {
 }
 
 // 更新 dom 属性
-function updateAttributes(dom, attributes) {
+export function updateAttributes(dom, attributes, oldAttributes) {
+  if (oldAttributes) {
+    // oldAttributes存在，移除旧的属性
+    const events = Object.keys(oldAttributes).filter((attribute) =>
+      attribute.startsWith('on')
+    );
+    const attrs = Object.keys(oldAttributes).filter(
+      (attribute) => !attribute.startsWith('on')
+    );
+    // 移除事件
+    events.forEach((event) => {
+      const eventName = event.slice(2).toLowerCase();
+      dom.removeEventListener(eventName, oldAttributes[event]);
+    });
+    // 移除属性
+    attrs.forEach((key) => {
+      if (key === 'className') {
+        // className 的处理
+        const classes = oldAttributes[key].split(' ');
+        classes.forEach((classKey) => {
+          dom.classList.remove(classKey);
+        });
+      } else if (key === 'style') {
+        // style处理
+        const style = oldAttributes[key];
+        Object.keys(style).forEach((styleKey) => {
+          dom.style[styleKey] = 'initial';
+        });
+      } else {
+        // 其他属性的处理
+        dom[key] = '';
+      }
+    });
+  }
+
+  // 挂载新的属性
   const events = Object.keys(attributes).filter((attribute) =>
     attribute.startsWith('on')
   );
