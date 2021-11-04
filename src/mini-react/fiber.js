@@ -1,4 +1,5 @@
 import { renderDom } from './react-dom';
+import { commitRoot } from './commit';
 
 let nextUnitOfWork = null;
 let rootFiber = null;
@@ -21,10 +22,6 @@ function performUnitOfWork(workInProgress) {
   if (!workInProgress.stateNode) {
     // 若当前 fiber 没有 stateNode，则根据 fiber 挂载的 element 的属性创建
     workInProgress.stateNode = renderDom(workInProgress.element);
-  }
-  if (workInProgress.return) {
-    // 如果 fiber 有父 fiber，将当前 dom 挂载到父 fiber 的 stateNode 下
-    workInProgress.return.stateNode.appendChild(workInProgress.stateNode);
   }
 
   // 迭代处理函数组件、类组件、列表渲染和 children 等情况
@@ -131,6 +128,11 @@ function workLoop(deadline) {
     // 循环执行工作单元任务
     performUnitOfWork(nextUnitOfWork);
     shouldYield = deadline.timeRemaining() < 1;
+  }
+  if (!nextUnitOfWork && rootFiber) {
+    // 表示进入 commit 阶段
+    commitRoot(rootFiber);
+    rootFiber = null;
   }
   requestIdleCallback(workLoop);
 }
