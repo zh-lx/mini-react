@@ -1,6 +1,10 @@
 import { updateAttributes } from './react-dom';
+import { getDeletions } from './fiber';
+
 // 从根节点开始 commit
 export function commitRoot(rootFiber) {
+  const deletions = getDeletions();
+  deletions.forEach(commitWork);
   commitWork(rootFiber.child);
 }
 
@@ -21,6 +25,9 @@ function commitWork(fiber) {
       const oldAttributes = Object.assign({}, fiber.alternate.element.props);
       delete oldAttributes['children'];
       updateAttributes(fiber.stateNode, newAttributes, oldAttributes);
+    } else if (fiber.flag === 'Deletion') {
+      parentDom.removeChild(fiber.stateNode);
+      return;
     }
     // 深度优先遍历，先遍历 child，后遍历 sibling
     commitWork(fiber.child);

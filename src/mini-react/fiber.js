@@ -5,6 +5,16 @@ import { reconcileChildren } from './reconciler';
 let nextUnitOfWork = null;
 let workInProgressRoot = null; // 当前工作的 fiber 树
 let currentRoot = null; // 上一次渲染的 fiber 树
+let deletions = [];
+
+// 将一个 fiber 加入 deletions 数组
+export function deleteFiber(fiber) {
+  deletions.push(fiber);
+}
+
+export function getDeletions() {
+  return deletions;
+}
 
 // 创建 rootFiber 作为首个 nextUnitOfWork
 export function createRoot(element, container) {
@@ -108,6 +118,7 @@ function workLoop(deadline) {
     commitRoot(workInProgressRoot);
     currentRoot = workInProgressRoot;
     workInProgressRoot = null;
+    deletions = [];
   }
   requestIdleCallback(workLoop);
 }

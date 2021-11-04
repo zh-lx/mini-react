@@ -1,3 +1,5 @@
+import { deleteFiber } from './fiber';
+
 export function reconcileChildren(workInProgress, elements) {
   // element 存在，则遍历其挂载到 fiber 树上
   let index = 0; // 当前遍历的子元素在父节点下的下标
@@ -44,6 +46,7 @@ export function reconcileChildren(workInProgress, elements) {
       if (oldFiber) {
         // oldFiber存在，删除 oldFiber
         oldFiber.flag = 'Deletion';
+        deleteFiber(oldFiber);
       }
     }
 
