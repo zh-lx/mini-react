@@ -38,7 +38,7 @@ function renderDom(element) {
 
   const {
     type,
-    props: { children },
+    props: { children, ...attributes },
   } = element;
 
   if (typeof type === 'string') {
@@ -71,7 +71,35 @@ function renderDom(element) {
     }
   }
 
+  updateAttributes(dom, attributes);
+
   return dom;
+}
+
+// 更新 dom 属性
+function updateAttributes(dom, attributes) {
+  Object.keys(attributes).forEach((key) => {
+    if (key.startsWith('on')) {
+      // 事件的处理
+      const eventName = key.slice(2).toLowerCase();
+      dom.addEventListener(eventName, attributes[key]);
+    } else if (key === 'className') {
+      // className 的处理
+      const classes = attributes[key].split(' ');
+      classes.forEach((classKey) => {
+        dom.classList.add(classKey);
+      });
+    } else if (key === 'style') {
+      // style处理
+      const style = attributes[key];
+      Object.keys(style).forEach((styleName) => {
+        dom.style[styleName] = style[styleName];
+      });
+    } else {
+      // 其他属性的处理
+      dom[key] = attributes[key];
+    }
+  });
 }
 
 const ReactDOM = {
