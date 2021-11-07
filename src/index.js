@@ -1,17 +1,57 @@
-import React from 'react';
+import { Component } from 'react';
 import ReactDOM from 'react-dom';
 import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
 
-ReactDOM.render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>,
-  document.getElementById('root')
+class ClassComponent extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {};
+  }
+
+  render() {
+    return (
+      <div className="class-component">
+        <div>this is a class Component</div>
+        <div>prop value is: {this.props.value}</div>
+      </div>
+    );
+  }
+}
+
+function FunctionComponent(props) {
+  return (
+    <div className="function-component">
+      <div>this is a function Component</div>
+      <div>prop value is: {props.value}</div>
+    </div>
+  );
+}
+
+const jsx = (
+  <div className="deep1-box">
+    <ClassComponent value={666} />
+    <FunctionComponent value={100} />
+    <div className="deep2-box-1">
+      <a href="https://github.com/zh-lx/mini-react">mini react link</a>
+      <p style={{ color: 'red' }}> this is a red p</p>
+      <div className="deep3-box">
+        {true && <div>condition true</div>}
+        {false && <div>condition false</div>}
+        <input
+          type="button"
+          value="say hello"
+          onClick={() => {
+            alert('hello');
+          }}
+        />
+      </div>
+    </div>
+    <div className="deep2-box-2">
+      {['item1', 'item2', 'item3'].map((item) => (
+        <li key={item}>{item}</li>
+      ))}
+    </div>
+  </div>
 );
 
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();
+ReactDOM.render(jsx, document.getElementById('root'));
