@@ -5,14 +5,22 @@ import './index.css';
 class ClassComponent extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = { count: 0 };
   }
+
+  addCount = () => {
+    this.setState({
+      count: this.state.count + 1,
+    });
+  };
 
   render() {
     return (
       <div className="class-component">
         <div>this is a class Component</div>
         <div>prop value is: {this.props.value}</div>
+        <div>count is: {this.state.count}</div>
+        <input type="button" value="add count" onClick={this.addCount} />
       </div>
     );
   }
