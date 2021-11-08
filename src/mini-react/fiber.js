@@ -1,5 +1,20 @@
 import { renderDom } from './react-dom';
 
+let nextUnitOfWork = null;
+let rootFiber = null;
+
+// 创建 rootFiber 作为首个 nextUnitOfWork
+export function createRoot(element, container) {
+  rootFiber = {
+    stateNode: container, // 记录对应的真实 dom 节点
+    element: {
+      // 挂载 element
+      props: { children: [element] },
+    },
+  };
+  nextUnitOfWork = rootFiber;
+}
+
 // 执行当前工作单元并设置下一个要执行的工作单元
 function performUnitOfWork(workInProgress) {
   if (!workInProgress.stateNode) {
@@ -62,6 +77,28 @@ function performUnitOfWork(workInProgress) {
       }
       prevSibling = newFiber;
       index++;
+    }
+  }
+
+  // 设置下一个工作单元
+  if (workInProgress.child) {
+    // 如果有子 fiber，则下一个工作单元是子 fiber
+    nextUnitOfWork = workInProgress.child;
+  } else {
+    let nextFiber = workInProgress;
+    while (nextFiber) {
+      if (nextFiber.sibling) {
+        // 没有子 fiber 有兄弟 fiber，则下一个工作单元是兄弟 fiber
+        nextUnitOfWork = nextFiber.sibling;
+        return;
+      } else {
+        // 子 fiber 和兄弟 fiber 都没有，深度优先遍历返回上一层
+        nextFiber = nextFiber.return;
+      }
+    }
+    if (!nextFiber) {
+      // 若返回最顶层，表示迭代结束，将 nextUnitOfWork 置空
+      nextUnitOfWork = null;
     }
   }
 }
