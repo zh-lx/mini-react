@@ -1,4 +1,4 @@
-import { Component } from 'react';
+import { Component } from './mini-react/react';
 import ReactDOM from './mini-react/react-dom';
 import './index.css';
 
