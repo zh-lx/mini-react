@@ -4,7 +4,7 @@ function render(element, container) {
 }
 
 // 将 React.Element 渲染为真实 dom
-function renderDom(element) {
+export function renderDom(element) {
   let dom = null; // 要返回的 dom
 
   if (!element && element !== 0) {
@@ -24,16 +24,6 @@ function renderDom(element) {
     return dom;
   }
 
-  if (Array.isArray(element)) {
-    // 列表渲染
-    dom = document.createDocumentFragment();
-    for (let item of element) {
-      const child = renderDom(item);
-      dom.appendChild(child);
-    }
-    return dom;
-  }
-
   const {
     type,
     props: { children, ...attributes },
@@ -44,27 +34,10 @@ function renderDom(element) {
     dom = document.createElement(type);
   } else if (typeof type === 'function') {
     // React组件的渲染
-    if (type.prototype.isReactComponent) {
-      // 类组件
-      const { props, type: Comp } = element;
-      const component = new Comp(props);
-      const jsx = component.render();
-      dom = renderDom(jsx);
-    } else {
-      // 函数组件
-      const { props, type: Fn } = element;
-      const jsx = Fn(props);
-      dom = renderDom(jsx);
-    }
+    dom = document.createDocumentFragment();
   } else {
     // 其他情况暂不考虑
     return null;
-  }
-
-  if (children) {
-    // children 存在，对子节点递归渲染
-    const childrenDom = renderDom(children);
-    dom.appendChild(childrenDom);
   }
 
   updateAttributes(dom, attributes);
