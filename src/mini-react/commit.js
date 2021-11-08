@@ -1,3 +1,5 @@
+import { updateAttributes } from './react-dom';
+
 // 从根节点开始 commit
 export function commitRoot(rootFiber) {
   commitWork(rootFiber.child);
@@ -21,6 +23,11 @@ function commitWork(fiber) {
       // targetPositionDom 不存在，插入到最后
       parentDom.appendChild(fiber.stateNode);
     }
+  } else if (fiber.flag === 'Update') {
+    const { children, ...newAttributes } = fiber.element.props;
+    const oldAttributes = Object.assign({}, fiber.alternate.element.props);
+    delete oldAttributes.children;
+    updateAttributes(fiber.stateNode, newAttributes, oldAttributes);
   }
 
   commitWork(fiber.sibling);

@@ -47,7 +47,33 @@ export function renderDom(element) {
 }
 
 // 更新 dom 属性
-function updateAttributes(dom, attributes) {
+export function updateAttributes(dom, attributes, oldAttributes) {
+  if (oldAttributes) {
+    // 有旧属性，移除旧属性
+    Object.keys(oldAttributes).forEach((key) => {
+      if (key.startsWith('on')) {
+        // 移除旧事件
+        const eventName = key.slice(2).toLowerCase();
+        dom.removeEventListener(eventName, oldAttributes[key]);
+      } else if (key === 'className') {
+        // className 的处理
+        const classes = oldAttributes[key].split(' ');
+        classes.forEach((classKey) => {
+          dom.classList.remove(classKey);
+        });
+      } else if (key === 'style') {
+        // style处理
+        const style = oldAttributes[key];
+        Object.keys(style).forEach((styleName) => {
+          dom.style[styleName] = 'initial';
+        });
+      } else {
+        // 其他属性的处理
+        dom[key] = '';
+      }
+    });
+  }
+
   Object.keys(attributes).forEach((key) => {
     if (key.startsWith('on')) {
       // 事件的处理
