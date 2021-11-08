@@ -17,6 +17,16 @@ export function getDeletions() {
   return deletions;
 }
 
+// 触发渲染
+export function commitRender() {
+  workInProgressRoot = {
+    stateNode: currentRoot.stateNode, // 记录对应的真实 dom 节点
+    element: currentRoot.element,
+    alternate: currentRoot,
+  };
+  nextUnitOfWork = workInProgressRoot;
+}
+
 // 创建 rootFiber 作为首个 nextUnitOfWork
 export function createRoot(element, container) {
   workInProgressRoot = {
@@ -44,10 +54,7 @@ function performUnitOfWork(workInProgress) {
     // 当前 fiber 对应 React 组件时，对其 return 迭代
     if (type.prototype.isReactComponent) {
       // 类组件
-      const { props, type: Comp } = workInProgress.element;
-      const component = new Comp(props);
-      const jsx = component.render();
-      children = [jsx];
+      updateClassComponent(workInProgress);
     } else {
       // 函数组件
       const { props, type: Fn } = workInProgress.element;
@@ -56,7 +63,7 @@ function performUnitOfWork(workInProgress) {
     }
   }
 
-  if (children) {
+  if (children || children === 0) {
     // children 存在时，对 children 迭代
     let elements = Array.isArray(children) ? children : [children];
     // 打平列表渲染时二维数组的情况（暂不考虑三维及以上数组的情形）
@@ -87,6 +94,26 @@ function performUnitOfWork(workInProgress) {
   }
 }
 
+// 类组件的更新
+function updateClassComponent(fiber) {
+  let jsx;
+  if (fiber.alternate) {
+    // 有旧组件，复用
+    const component = fiber.alternate.component;
+    fiber.component = component;
+    component._UpdateProps(fiber.element.props);
+    jsx = component.render();
+  } else {
+    // 没有则创建新组件
+    const { props, type: Comp } = fiber.element;
+    const component = new Comp(props);
+    fiber.component = component;
+    jsx = component.render();
+  }
+
+  reconcileChildren(fiber, [jsx]);
+}
+
 // 处理循环和中断逻辑
 function workLoop(deadline) {
   let shouldYield = false;
@@ -100,6 +127,7 @@ function workLoop(deadline) {
     commitRoot(workInProgressRoot);
     currentRoot = workInProgressRoot;
     workInProgressRoot = null;
+    deletions = [];
   }
   requestIdleCallback(workLoop);
 }
