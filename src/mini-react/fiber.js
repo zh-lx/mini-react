@@ -5,6 +5,17 @@ import { reconcileChildren } from './reconciler';
 let nextUnitOfWork = null;
 let workInProgressRoot = null; // 当前工作的 fiber 树
 let currentRoot = null; // 上一次渲染的 fiber 树
+let deletions = []; // 要执行删除 dom 的 fiber
+
+// 将某个 fiber 加入 deletions 数组
+export function deleteFiber(fiber) {
+  deletions.push(fiber);
+}
+
+// 获取 deletions 数组
+export function getDeletions() {
+  return deletions;
+}
 
 // 创建 rootFiber 作为首个 nextUnitOfWork
 export function createRoot(element, container) {
