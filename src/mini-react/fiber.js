@@ -6,6 +6,8 @@ let nextUnitOfWork = null;
 let workInProgressRoot = null; // 当前工作的 fiber 树
 let currentRoot = null; // 上一次渲染的 fiber 树
 let deletions = []; // 要执行删除 dom 的 fiber
+let currentFunctionFiber = null; // 当前正在执行的函数组件对应 fiber
+let hookIndex = 0; //  当前正在执行的函数组件 hook 的下标
 
 // 将某个 fiber 加入 deletions 数组
 export function deleteFiber(fiber) {
@@ -25,6 +27,16 @@ export function commitRender() {
     alternate: currentRoot,
   };
   nextUnitOfWork = workInProgressRoot;
+}
+
+// 获取当前的执行的函数组件对应的 fiber
+export function getCurrentFunctionFiber() {
+  return currentFunctionFiber;
+}
+
+// 获取当前 hook 下标
+export function getHookIndex() {
+  return hookIndex++;
 }
 
 // 创建 rootFiber 作为首个 nextUnitOfWork
@@ -66,9 +78,7 @@ function performUnitOfWork(workInProgress) {
       updateClassComponent(workInProgress);
     } else {
       // 函数组件
-      const { props, type: Fn } = workInProgress.element;
-      const jsx = Fn(props);
-      children = [jsx];
+      updateFunctionComponent(workInProgress);
     }
   }
 
@@ -120,6 +130,16 @@ function updateClassComponent(fiber) {
     jsx = component.render();
   }
 
+  reconcileChildren(fiber, [jsx]);
+}
+
+// 函数组件的更新
+function updateFunctionComponent(fiber) {
+  currentFunctionFiber = fiber;
+  currentFunctionFiber.hooks = [];
+  hookIndex = 0;
+  const { props, type: Fn } = fiber.element;
+  const jsx = Fn(props);
   reconcileChildren(fiber, [jsx]);
 }
 
