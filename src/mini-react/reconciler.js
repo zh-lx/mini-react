@@ -1,3 +1,5 @@
+import { deleteFiber } from './fiber';
+
 export function reconcileChildren(workInProgress, elements) {
   let index = 0; // 当前遍历的子元素在父节点下的下标
   let prevSibling = null; // 记录上一个兄弟节点
@@ -42,6 +44,7 @@ export function reconcileChildren(workInProgress, elements) {
       if (oldFiber) {
         // oldFiber存在，删除 oldFiber
         oldFiber.flag = 'Deletion';
+        deleteFiber(oldFiber);
       }
     }
 
