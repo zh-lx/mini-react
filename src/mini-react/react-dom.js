@@ -1,6 +1,7 @@
+import { createRoot } from './fiber';
+
 function render(element, container) {
-  const dom = renderDom(element);
-  container.appendChild(dom);
+  createRoot(element, container);
 }
 
 // 将 React.Element 渲染为真实 dom
