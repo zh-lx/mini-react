@@ -102,3 +102,16 @@ function performUnitOfWork(workInProgress) {
     }
   }
 }
+
+// 处理循环和中断逻辑
+function workLoop(deadline) {
+  let shouldYield = false;
+  while (nextUnitOfWork && !shouldYield) {
+    // 循环执行工作单元任务
+    performUnitOfWork(nextUnitOfWork);
+    shouldYield = deadline.timeRemaining() < 1;
+  }
+  requestIdleCallback(workLoop);
+}
+
+requestIdleCallback(workLoop);
